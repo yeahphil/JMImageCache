@@ -58,7 +58,9 @@ static char kJMImageURLObjectKey;
         self.image = i;
         self.jm_imageURL = nil;
 	} else {
-        self.image = placeholderImage;
+        if (placeholderImage) {
+            self.image = placeholderImage;
+        }
 
         __block UIImageView *safeSelf = self;
 
