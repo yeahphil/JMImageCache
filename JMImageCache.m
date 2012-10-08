@@ -7,6 +7,7 @@
 //
 
 #import "JMImageCache.h"
+#import "UIImage+AnimatedGif.h"
 
 static NSString *_JMImageCacheDirectory;
 
@@ -23,6 +24,9 @@ inline static NSString *keyForURL(NSURL *url) {
 static inline NSString *cachePathForKey(NSString *key) {
     NSString *fileName = [NSString stringWithFormat:@"JMImageCache-%u", [key hash]];
 	return [JMImageCacheDirectory() stringByAppendingPathComponent:fileName];
+}
+static inline BOOL isGifKey(NSString *key) {
+    return [[[key pathExtension] lowercaseString] isEqual:@"gif"];
 }
 
 JMImageCache *_sharedCache = nil;
@@ -69,8 +73,8 @@ JMImageCache *_sharedCache = nil;
 
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         NSData *data = [NSData dataWithContentsOfURL:url];
-        UIImage *i = [[UIImage alloc] initWithData:data];
-
+        
+        UIImage *i = [self imageFromData:data animated:isGifKey(key)];
         NSString *cachePath = cachePathForKey(key);
         NSInvocation *writeInvocation = [NSInvocation invocationWithMethodSignature:[self methodSignatureForSelector:@selector(writeData:toPath:)]];
 
@@ -194,12 +198,21 @@ JMImageCache *_sharedCache = nil;
 }
 
 - (UIImage *) imageFromDiskForKey:(NSString *)key {
-	UIImage *i = [[UIImage alloc] initWithData:[NSData dataWithContentsOfFile:cachePathForKey(key) options:0 error:NULL]];
+	UIImage *i = [self imageFromData:[NSData dataWithContentsOfFile:cachePathForKey(key) options:0 error:NULL] animated:isGifKey(key)];
 	return i;
 }
 
 - (UIImage *) imageFromDiskForURL:(NSURL *)url {
     return [self imageFromDiskForKey:keyForURL(url)];
+}
+
+- (UIImage *)imageFromData:(NSData *)data animated:(BOOL)isAnimated
+{
+    if (isAnimated) {
+        return [UIImage animatedGifWithImageData:data];
+    } else {
+        return [[UIImage alloc] initWithData:data];
+    }
 }
 
 #pragma mark -
