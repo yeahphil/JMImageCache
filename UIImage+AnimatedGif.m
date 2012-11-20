@@ -29,7 +29,6 @@
     NSTimeInterval duration = [properties[(__bridge NSString *)kCGImagePropertyGIFDictionary][(__bridge NSString *)kCGImagePropertyGIFDelayTime] doubleValue] / 100.0;
     
     size_t count = CGImageSourceGetCount(source);
-    NSTimeInterval durationByFrames = 0;
 
     if (count > 1) {
         NSMutableArray *images = [NSMutableArray arrayWithCapacity:count];
