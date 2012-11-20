@@ -29,6 +29,7 @@
     NSTimeInterval duration = [properties[(__bridge NSString *)kCGImagePropertyGIFDictionary][(__bridge NSString *)kCGImagePropertyGIFDelayTime] doubleValue] / 100.0;
     
     size_t count = CGImageSourceGetCount(source);
+    NSTimeInterval durationByFrames = 0;
 
     if (count > 1) {
         NSMutableArray *images = [NSMutableArray arrayWithCapacity:count];
@@ -37,7 +38,14 @@
             if (!cgImage)
                 return nil;
             [images addObject:[UIImage imageWithCGImage:cgImage]];
+            
             CGImageRelease(cgImage);
+        }
+        
+        // use 1/15s as the default frame duration
+        // (most browsers seem to use 1/10s)
+        if (duration == 0) {
+            duration = (1.0/15.0) * count;
         }
         
         img = [UIImage animatedImageWithImages:images duration:duration];
