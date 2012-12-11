@@ -42,7 +42,6 @@ inline static NSString *hashForKey(NSString *key) {
 
 static inline NSString *cachePathForKey(NSString *key) {
     NSString *fileName = [NSString stringWithFormat:@"JMImageCache-%@", hashForKey(key)];
-    NSLog(@"cached image: %@", fileName);
 	return [JMImageCacheDirectory() stringByAppendingPathComponent:fileName];
 }
 static inline BOOL isGifKey(NSString *key) {
