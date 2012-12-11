@@ -8,6 +8,7 @@
 
 #import "JMImageCache.h"
 #import "UIImage+AnimatedGif.h"
+#import <CommonCrypto/CommonDigest.h>
 
 static NSString *_JMImageCacheDirectory;
 
@@ -21,8 +22,27 @@ static inline NSString *JMImageCacheDirectory() {
 inline static NSString *keyForURL(NSURL *url) {
 	return [url absoluteString];
 }
+
+// SLOW piece of shit optimize me?
+inline static NSString *hashForKey(NSString *key) {
+    int len = CC_MD5_DIGEST_LENGTH;
+	const char *data = [key UTF8String];
+	unsigned char hashed[len];
+	CC_MD5(data, strlen(data), hashed);
+	
+	NSMutableString *hexString = [NSMutableString stringWithCapacity:len*2];
+	
+	for (int i=0; i<len; i++) {
+		[hexString appendFormat:@"%x",hashed[i]];
+	}
+	
+	return hexString;
+}
+
+
 static inline NSString *cachePathForKey(NSString *key) {
-    NSString *fileName = [NSString stringWithFormat:@"JMImageCache-%u", [key hash]];
+    NSString *fileName = [NSString stringWithFormat:@"JMImageCache-%@", hashForKey(key)];
+    NSLog(@"cached image: %@", fileName);
 	return [JMImageCacheDirectory() stringByAppendingPathComponent:fileName];
 }
 static inline BOOL isGifKey(NSString *key) {
